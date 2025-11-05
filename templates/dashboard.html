@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Secure Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root {
+        color-scheme: dark light;
+        --gradient-a: #0d101f;
+        --gradient-b: #18224a;
+        --gradient-c: #401974;
+        --glass-bg: rgba(12, 15, 30, 0.35);
+        --glass-border: rgba(255, 255, 255, 0.15);
+        --accent: #6d9bff;
+        --accent-strong: #8d4bff;
+        --text: rgba(244, 247, 255, 0.92);
+        --muted: rgba(244, 247, 255, 0.68);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top left, rgba(160, 87, 255, 0.28), transparent 52%),
+                    radial-gradient(circle at bottom right, rgba(0, 188, 255, 0.22), transparent 45%),
+                    linear-gradient(135deg, var(--gradient-a), var(--gradient-b), var(--gradient-c));
+        padding: clamp(1.5rem, 3vw, 3rem);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+      }
+
+      .halo {
+        position: fixed;
+        inset: 10% auto auto -12%;
+        width: 420px;
+        height: 420px;
+        background: linear-gradient(135deg, rgba(118, 96, 255, 0.35), rgba(118, 96, 255, 0));
+        filter: blur(120px);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .halo.alt {
+        inset: auto -10% -20% auto;
+        background: linear-gradient(135deg, rgba(76, 196, 255, 0.35), rgba(76, 196, 255, 0));
+      }
+
+      header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+        border-radius: 26px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        box-shadow: 0 24px 38px rgba(12, 15, 30, 0.35);
+      }
+
+      header .title {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      header .title span {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.45ch;
+        color: rgba(244, 247, 255, 0.65);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: clamp(1.5rem, 4vw, 2.4rem);
+        font-weight: 600;
+        letter-spacing: 0.05ch;
+      }
+
+      .user-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 0.6rem 1rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .user-chip strong {
+        letter-spacing: 0.06ch;
+      }
+
+      .logout {
+        margin-left: 1rem;
+        padding: 0.55rem 1.3rem;
+        border-radius: 999px;
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.09ch;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 16px 28px rgba(76, 155, 255, 0.25);
+        transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .logout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 35px rgba(76, 155, 255, 0.35);
+        filter: brightness(1.08);
+      }
+
+      .logout:active {
+        transform: translateY(0);
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+      }
+
+      .card {
+        position: relative;
+        padding: clamp(1.75rem, 3vw, 2.5rem);
+        border-radius: 26px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 20px 34px rgba(12, 15, 30, 0.32);
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(155deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+        opacity: 0;
+        transition: opacity 300ms ease;
+        pointer-events: none;
+      }
+
+      .card:hover::before {
+        opacity: 0.8;
+      }
+
+      .card h2 {
+        margin: 0 0 1rem;
+        font-size: 1.4rem;
+        letter-spacing: 0.05ch;
+      }
+
+      .card p {
+        margin: 0 0 1.4rem;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.65;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+      }
+
+      .metric {
+        padding: 1rem 1.2rem;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .metric .label {
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.22ch;
+        color: rgba(244, 247, 255, 0.6);
+      }
+
+      .metric .value {
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
+
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 1ms !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="halo"></div>
+    <div class="halo alt"></div>
+    <header>
+      <div class="title">
+        <span>Security Console</span>
+        <h1>Welcome back, {{ user.username }}!</h1>
+      </div>
+      <div>
+        <div class="user-chip">
+          <strong>{{ user.role|title }}</strong>
+          {% if current_user %}
+            <span>{{ current_user.username }}</span>
+          {% endif %}
+        </div>
+        <a class="logout" href="{{ url_for('logout') }}">Log out</a>
+      </div>
+    </header>
+
+    <main>
+      <article class="card">
+        <h2>Access Overview</h2>
+        <p>This space can surface environment insights, alerts, and recommended actions tailored to the <strong>{{ user.role }}</strong> role. Integrate audit feeds or analytic widgets here to complete the pattern demonstration.</p>
+        <div class="metric-grid">
+          <div class="metric">
+            <span class="label">Active Sessions</span>
+            <span class="value">3</span>
+          </div>
+          <div class="metric">
+            <span class="label">Alerts</span>
+            <span class="value">0</span>
+          </div>
+          <div class="metric">
+            <span class="label">Last Audit</span>
+            <span class="value">5&nbsp;min</span>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <h2>Next Actions</h2>
+        <p>Finish hardening the application by validating inputs, enforcing RBAC on critical routes, and reviewing audit trails. Add your own components to show how each pattern works in concert.</p>
+        <p class="muted">Hint: surface per-role quick links or embed charts to build a complete experience.</p>
+      </article>
+    </main>
+
+  </body>
+</html>

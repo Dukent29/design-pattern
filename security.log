@@ -1,0 +1,66 @@
+2025-11-05 14:25:52 INFO event=login_failed user=alice
+2025-11-05 14:26:39 INFO event=login_failed user=alice
+2025-11-05 14:29:01 INFO event=login_failed user=alice
+2025-11-05 14:29:22 INFO event=login_failed user=alice
+2025-11-05 14:33:30 INFO event=login_attempt user=alice
+2025-11-05 14:33:31 INFO event=login_failed user=alice reason=invalid_password
+2025-11-05 14:33:38 INFO event=login_attempt user=alice
+2025-11-05 14:33:39 INFO event=login_failed user=alice reason=invalid_password
+2025-11-05 14:33:53 INFO event=login_attempt user=alice
+2025-11-05 14:33:54 INFO event=login_failed user=alice reason=invalid_password
+2025-11-05 14:36:28 INFO event=login_attempt user=alice
+2025-11-05 14:36:29 INFO event=login_failed user=alice reason=invalid_password
+2025-11-05 14:36:50 INFO event=login_attempt user=alice
+2025-11-05 14:36:51 INFO event=login_failed user=alice reason=invalid_password
+2025-11-05 14:41:07 INFO event=login_attempt user=alice
+2025-11-05 14:41:08 INFO event=login_success user=alice
+2025-11-05 14:47:04 INFO event=logout user=alice
+2025-11-05 14:47:19 INFO event=login_attempt user=alice
+2025-11-05 14:47:20 INFO event=login_success user=alice
+2025-11-05 14:47:34 INFO event=logout user=alice
+2025-11-05 14:48:03 INFO event=login_attempt user=admin
+2025-11-05 14:48:03 INFO event=login_failed user=admin reason=unknown_user
+2025-11-05 14:48:21 INFO event=login_attempt user=admin
+2025-11-05 14:48:21 INFO event=login_failed user=admin reason=unknown_user
+2025-11-05 14:48:24 INFO event=login_validation_failed user=admin
+2025-11-05 14:48:25 INFO event=login_validation_failed user=admin
+2025-11-05 14:48:26 INFO event=login_validation_failed user=admin
+2025-11-05 14:52:13 INFO event=login_attempt user=admin
+2025-11-05 14:52:13 INFO event=login_failed user=admin reason=unknown_user
+2025-11-05 14:53:00 INFO event=login_attempt user=admin
+2025-11-05 14:53:00 INFO event=login_failed user=admin reason=unknown_user
+2025-11-05 14:53:09 INFO event=login_attempt user=admin
+2025-11-05 14:53:09 INFO event=login_failed user=admin reason=unknown_user
+2025-11-05 14:53:31 INFO event=login_attempt user=alice
+2025-11-05 14:53:32 INFO event=login_success user=alice
+2025-11-05 14:57:36 INFO event=logout user=alice
+2025-11-05 14:57:53 INFO event=login_attempt user=alice
+2025-11-05 14:57:54 INFO event=login_failed user=alice reason=invalid_password
+2025-11-05 14:58:17 INFO event=login_attempt user=alice
+2025-11-05 14:58:18 INFO event=login_success user=alice
+2025-11-05 15:00:16 INFO event=logout user=alice
+2025-11-05 15:25:42 INFO event=login_attempt user=admin
+2025-11-05 15:25:42 INFO event=login_failed user=admin reason=unknown_user
+2025-11-05 15:29:02 INFO event=login_attempt user=admin
+2025-11-05 15:29:02 INFO event=login_failed user=admin reason=unknown_user
+2025-11-05 15:41:11 INFO event=login_attempt user=admin
+2025-11-05 15:41:13 INFO event=login_success user=admin
+2025-11-05 15:41:17 INFO event=logout user=admin
+2025-11-05 15:41:36 INFO event=login_attempt user=Alice
+2025-11-05 15:41:37 INFO event=login_success user=alice
+2025-11-05 15:41:59 INFO event=login_attempt user=Alice
+2025-11-05 15:42:00 INFO event=login_success user=alice
+2025-11-05 15:57:18 INFO event=login_attempt user=alice
+2025-11-05 15:57:19 INFO event=login_failed user=alice reason=invalid_password
+2025-11-05 15:57:28 INFO event=login_attempt user=alice
+2025-11-05 15:57:29 INFO event=login_success user=alice
+2025-11-05 15:57:52 INFO event=login_attempt user=admin
+2025-11-05 15:57:53 INFO event=login_success user=admin
+2025-11-05 16:00:34 INFO event=logout user=admin
+2025-11-05 16:11:11 INFO event=login_attempt user=alice
+2025-11-05 16:11:13 INFO event=login_success user=alice
+2025-11-05 16:32:23 INFO event=logout user=alice
+2025-11-05 16:32:47 INFO event=login_validation_failed user='1' == 1
+2025-11-05 16:33:06 INFO event=login_attempt user=admin
+2025-11-05 16:33:07 INFO event=login_success user=admin
+2025-11-05 16:34:21 INFO event=logout user=admin

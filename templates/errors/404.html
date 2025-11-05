@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <title>404 • Page introuvable</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root {
+        --bg-start: #0d111f;
+        --bg-mid: #212b52;
+        --bg-end: #5f1ba6;
+        --text: rgba(244, 247, 255, 0.94);
+        --muted: rgba(244, 247, 255, 0.7);
+        --accent: #7aa5ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(1.5rem, 4vw, 3rem);
+        font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top left, rgba(160, 87, 255, 0.35), transparent 50%),
+                    radial-gradient(circle at bottom right, rgba(0, 184, 255, 0.28), transparent 45%),
+                    linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+        overflow: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: absolute;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(118, 96, 255, 0.35), rgba(118, 96, 255, 0));
+        filter: blur(120px);
+        opacity: 0.8;
+      }
+
+      body::before {
+        top: -5%;
+        left: -10%;
+      }
+
+      body::after {
+        bottom: -20%;
+        right: -8%;
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+        width: min(560px, 100%);
+        padding: clamp(2.25rem, 5vw, 3.25rem);
+        border-radius: 28px;
+        background: rgba(12, 15, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        box-shadow: 0 26px 42px rgba(12, 15, 30, 0.45);
+        text-align: left;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.8rem, 7vw, 4rem);
+        letter-spacing: 0.12ch;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 0.75rem 0 1.5rem;
+        font-size: clamp(1.3rem, 3vw, 1.65rem);
+        color: var(--muted);
+        font-weight: 400;
+      }
+
+      p {
+        margin: 0 0 1.6rem;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      strong {
+        color: var(--text);
+      }
+
+      a.button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.85rem 1.6rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #4c8dff, #8c4bff);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        letter-spacing: 0.1ch;
+        text-transform: uppercase;
+        box-shadow: 0 18px 32px rgba(76, 141, 255, 0.35);
+        transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+      }
+
+      a.button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 40px rgba(76, 141, 255, 0.45);
+        filter: brightness(1.05);
+      }
+
+      a.button:active {
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>404</h1>
+      <h2>Oups&nbsp;! Ta tentative a fait chou blanc…</h2>
+      <p><strong>On dirait bien que cette page n’existe pas.</strong> Sérieusement, ce raccourci n’était pas bon. Respire un coup, rafraîchis ton plan d’attaque… et retourne voir ta mère, elle saura quoi faire.</p>
+      <p>Quand tu es prêt à revenir dans la zone sécurisée, on t’attend juste là.</p>
+      <a class="button" href="{{ url_for('login') }}">Revenir à l’accueil</a>
+    </main>
+  </body>
+</html>
