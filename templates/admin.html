@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 2rem;
+        background: #0f172a;
+        color: #f8fafc;
+      }
+
+      header, main {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+
+      a {
+        color: #93c5fd;
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 28px 45px rgba(15, 23, 42, 0.35);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Admin Panel</h1>
+        <p>Signed in as <strong>{{ user.username }}</strong> ({{ user.role }})</p>
+      </div>
+      <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a> |
+        <a href="{{ url_for('logout') }}">Log out</a>
+      </nav>
+    </header>
+
+    <main>
+      {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+          <section class="card" aria-live="polite">
+            <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem;">
+              {% for category, message in messages %}
+                <li style="padding:0.75rem 1rem;border-radius:12px;
+                background: {% if category == 'success' %}rgba(34,197,94,0.15){% else %}rgba(239,68,68,0.18){% endif %};
+                border:1px solid rgba(255,255,255,0.1);">
+                  <strong>{{ category|title }}:</strong> {{ message }}
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      {% endwith %}
+
+      <article class="card">
+        <h2>Create User</h2>
+        <p>Use this form to provision a new account. Passwords are hashed before storage.</p>
+        <form method="post" style="display:grid;gap:1rem;">
+          <label style="display:grid;gap:0.35rem;">
+            <span>Username</span>
+            <input type="text" name="username" required minlength="3" maxlength="20"
+                   pattern="[A-Za-z0-9]{3,20}"
+                   style="padding:0.65rem;border-radius:10px;border:1px solid rgba(148,163,184,0.35);">
+          </label>
+          <label style="display:grid;gap:0.35rem;">
+            <span>Password</span>
+            <input type="password" name="password" required
+                   placeholder="Upper, lower, digit, special, 8+ chars"
+                   style="padding:0.65rem;border-radius:10px;border:1px solid rgba(148,163,184,0.35);">
+          </label>
+          <label style="display:grid;gap:0.35rem;">
+            <span>Role</span>
+            <select name="role" required style="padding:0.65rem;border-radius:10px;border:1px solid rgba(148,163,184,0.35);">
+              <option value="">Select role…</option>
+              <option value="admin">Admin</option>
+              <option value="editor">Editor</option>
+              <option value="viewer">Viewer</option>
+            </select>
+          </label>
+          <button type="submit"
+                  style="padding:0.75rem 1.25rem;border:none;border-radius:12px;
+                         background:linear-gradient(135deg,#38bdf8,#2563eb);color:#fff;
+                         font-weight:600;letter-spacing:0.05ch;cursor:pointer;">
+            Create User
+          </button>
+        </form>
+      </article>
+
+      <article class="card">
+        <h2>API Reference</h2>
+        <p>Prefer automation? Send a POST request to <code>/api/users</code> with JSON:</p>
+<pre>{
+  "username": "newuser",
+  "password": "StrongPass#123",
+  "role": "viewer"
+}</pre>
+        <p>The endpoint enforces the same validation rules and records the action in the audit log.</p>
+      </article>
+    </main>
+  </body>
+</html>

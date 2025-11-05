@@ -13,7 +13,7 @@ from .authorization import (
     require_permission,
     require_roles,
 )
-from .validation import ValidationResult, validate_login_form
+from .validation import ValidationResult, validate_login_form, validate_user_creation_payload
 from .audit import audit_event
 
 __all__ = [
@@ -28,5 +28,6 @@ __all__ = [
     "require_roles",
     "ValidationResult",
     "validate_login_form",
+    "validate_user_creation_payload",
     "audit_event",
 ]

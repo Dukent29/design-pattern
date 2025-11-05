@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Any, Dict
-
 from flask import (
     Flask,
     Response,
@@ -9,13 +8,18 @@ from flask import (
     redirect,
     render_template,
     request,
+    jsonify,
     url_for,
 )
 
 from security.authentication import AuthenticatedUser, auth_enforcer
-from security.authorization import current_user, require_permission
+from security.authorization import current_user, require_permission, require_roles
 from security.audit import audit_event
-from security.validation import ValidationResult, validate_login_form
+from security.validation import (
+    ValidationResult,
+    validate_login_form,
+    validate_user_creation_payload,
+)
 
 
 def create_app() -> Flask:
@@ -94,6 +98,96 @@ def create_app() -> Flask:
     @require_permission("dashboard", "read")
     def dashboard(user):
         return render_template("dashboard.html", user=user)
+
+    @app.route("/admin", methods=["GET", "POST"])
+    @require_roles("admin")
+    def admin_panel(user):
+        if request.method == "POST":
+            payload = {
+                "username": request.form.get("username", ""),
+                "password": request.form.get("password", ""),
+                "role": request.form.get("role", ""),
+            }
+            result = validate_user_creation_payload(payload)
+            if not result.is_valid:
+                for error in result.errors:
+                    flash(error, "error")
+                audit_event(
+                    "user_creation_failed",
+                    user.get("username"),
+                    {"errors": "|".join(result.errors), "source": "admin_form"},
+                )
+                return render_template("admin.html", user=user), 400
+
+            try:
+                created_user = auth_enforcer.create_user(
+                    result.data["username"],
+                    result.data["password"],
+                    result.data["role"],
+                )
+            except ValueError as exc:
+                flash(str(exc), "error")
+                audit_event(
+                    "user_creation_failed",
+                    user.get("username"),
+                    {"reason": str(exc), "source": "admin_form"},
+                )
+                return render_template("admin.html", user=user), 400
+
+            flash(f"User '{created_user.username}' created successfully.", "success")
+            audit_event(
+                "user_creation_success",
+                user.get("username"),
+                {
+                    "created_username": created_user.username,
+                    "role": created_user.role,
+                    "source": "admin_form",
+                },
+            )
+            return redirect(url_for("admin_panel"))
+
+        return render_template("admin.html", user=user)
+
+    @app.route("/api/users", methods=["POST"])
+    @require_roles("admin")
+    def create_user_api(user):
+        if not request.is_json:
+            audit_event("user_creation_failed", user.get("username"), {"reason": "invalid_content_type"})
+            return jsonify({"errors": ["Content-Type must be application/json"]}), 415
+
+        payload = request.get_json(silent=True) or {}
+        result = validate_user_creation_payload(payload)
+        if not result.is_valid:
+            audit_event(
+                "user_creation_failed",
+                user.get("username"),
+                {"errors": "|".join(result.errors)},
+            )
+            return jsonify({"errors": result.errors}), 400
+
+        try:
+            created_user = auth_enforcer.create_user(
+                result.data["username"],
+                result.data["password"],
+                result.data["role"],
+            )
+        except ValueError as exc:
+            audit_event("user_creation_failed", user.get("username"), {"reason": str(exc)})
+            return jsonify({"errors": [str(exc)]}), 400
+
+        audit_event(
+            "user_creation_success",
+            user.get("username"),
+            {"created_username": created_user.username, "role": created_user.role},
+        )
+        response_body = {
+            "status": "created",
+            "user": {
+                "username": created_user.username,
+                "role": created_user.role,
+            },
+        }
+        return jsonify(response_body), 201
 
     return app
 

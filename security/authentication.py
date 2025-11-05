@@ -47,6 +47,11 @@ def _build_user_store() -> Dict[str, Dict[str, str]]:
             "password_hash": _hashed("ViewerPass123!"),
             "role": "viewer",
         },
+        "charlie": {
+            "username": "charlie",
+            "password_hash": _hashed("User#1234"),
+            "role": "viewer",
+        },
     }
 
 
@@ -128,7 +133,6 @@ class AuthenticationEnforcer:
             return None
 
         refreshed_user = AuthenticatedUser(username=username, role=role)
-        # Sliding expiration: extend session on activity.
         refreshed_data = dict(session[self.SESSION_KEY])
         refreshed_data[self.EXPIRES_AT_KEY] = self._new_expiry().isoformat()
         session[self.SESSION_KEY] = refreshed_data
@@ -139,6 +143,32 @@ class AuthenticationEnforcer:
         data = session.pop(self.SESSION_KEY, None)
         username = data.get("username") if isinstance(data, dict) else None
         audit_event("logout", username)
+
+    def create_user(
+        self,
+        username: str,
+        password: str,
+        role: str,
+    ) -> AuthenticatedUser:
+        """Create a new user in the backing user store."""
+        normalized_username = (username or "").strip().lower()
+        if not normalized_username:
+            raise ValueError("Username is required.")
+
+        if normalized_username in self._user_store:
+            raise ValueError("User already exists.")
+
+        if not role:
+            raise ValueError("Role is required.")
+
+        record = {
+            "username": normalized_username,
+            "password_hash": generate_password_hash(password),
+            "role": role,
+        }
+        self._user_store[normalized_username] = record
+        audit_event("user_created", normalized_username, {"role": role})
+        return AuthenticatedUser(username=normalized_username, role=role)
 
 
 auth_enforcer = AuthenticationEnforcer()

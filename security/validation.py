@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import Dict, List, Mapping
 
+from .authorization import authorization_enforcer
 
 class InputValidator:
     """Whitelist-based input validation and sanitization utilities."""
@@ -131,5 +132,39 @@ def validate_login_form(form: Mapping[str, str]) -> ValidationResult:
     return ValidationResult(
         is_valid=not errors,
         data={"username": username, "password": password},
+        errors=errors,
+    )
+
+
+def validate_user_creation_payload(payload: Mapping[str, str]) -> ValidationResult:
+    """Validate API payload for creating a new user."""
+    username = (payload.get("username") or "").strip()
+    password = payload.get("password") or ""
+    role = (payload.get("role") or "").strip().lower()
+
+    errors: List[str] = []
+
+    if not username:
+        errors.append("Username is required.")
+    elif not _validator.validate_username(username):
+        errors.append("Username must be 3-20 alphanumeric characters.")
+    elif _validator.detect_sql_injection(username):
+        errors.append("Username contains disallowed patterns.")
+
+    if not password:
+        errors.append("Password is required.")
+    elif not _validator.validate_password(password):
+        errors.append(
+            "Password must be 8+ chars and include upper, lower, number, and special characters."
+        )
+
+    if not role:
+        errors.append("Role is required.")
+    elif authorization_enforcer.permissions_for(role) == set():
+        errors.append(f"Role '{role}' is not recognized.")
+
+    return ValidationResult(
+        is_valid=not errors,
+        data={"username": username, "password": password, "role": role},
         errors=errors,
     )
