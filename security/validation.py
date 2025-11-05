@@ -118,15 +118,15 @@ def validate_login_form(form: Mapping[str, str]) -> ValidationResult:
     errors: List[str] = []
 
     if not username:
-        errors.append("Username is required.")
+        errors.append("Le nom d’utilisateur est obligatoire.")
     elif not _validator.validate_username(username):
-        errors.append("Username must be 3-20 alphanumeric characters.")
+        errors.append("Le nom d’utilisateur doit comporter 3 à 20 caractères alphanumériques.")
 
     if not password:
-        errors.append("Password is required.")
+        errors.append("Le mot de passe est obligatoire.")
     elif not _validator.validate_password(password):
         errors.append(
-            "Password must be 8+ chars and include upper, lower, number, and special characters."
+            "Le mot de passe doit contenir au moins 8 caractères avec majuscule, minuscule, chiffre et symbole."
         )
 
     return ValidationResult(
@@ -145,23 +145,23 @@ def validate_user_creation_payload(payload: Mapping[str, str]) -> ValidationResu
     errors: List[str] = []
 
     if not username:
-        errors.append("Username is required.")
+        errors.append("Le nom d’utilisateur est obligatoire.")
     elif not _validator.validate_username(username):
-        errors.append("Username must be 3-20 alphanumeric characters.")
+        errors.append("Le nom d’utilisateur doit comporter 3 à 20 caractères alphanumériques.")
     elif _validator.detect_sql_injection(username):
-        errors.append("Username contains disallowed patterns.")
+        errors.append("Le nom d’utilisateur contient des motifs interdits.")
 
     if not password:
-        errors.append("Password is required.")
+        errors.append("Le mot de passe est obligatoire.")
     elif not _validator.validate_password(password):
         errors.append(
-            "Password must be 8+ chars and include upper, lower, number, and special characters."
+            "Le mot de passe doit contenir au moins 8 caractères avec majuscule, minuscule, chiffre et symbole."
         )
 
     if not role:
-        errors.append("Role is required.")
+        errors.append("Le rôle est obligatoire.")
     elif authorization_enforcer.permissions_for(role) == set():
-        errors.append(f"Role '{role}' is not recognized.")
+        errors.append(f"Le rôle « {role} » n’est pas reconnu.")
 
     return ValidationResult(
         is_valid=not errors,

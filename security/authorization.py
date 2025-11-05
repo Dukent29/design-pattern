@@ -101,12 +101,12 @@ def require_roles(*allowed_roles: str) -> Callable[[F], F]:
         def wrapped(*args, **kwargs):
             user = current_user()
             if not user:
-                flash("Please log in to access this page.", "warning")
+                flash("Merci de vous connecter pour accéder à cette page.", "warning")
                 return redirect(url_for("login"))
 
             role = (user.get("role") or "").lower()
             if normalized_roles and role not in normalized_roles:
-                flash("You do not have permission to view that page.", "error")
+                flash("Vous n’avez pas l’autorisation d’accéder à cette page.", "error")
                 audit_event("authorization_denied", user.get("username"), {"required_roles": ",".join(normalized_roles)})
                 abort(403)
 
@@ -130,11 +130,11 @@ def require_permission(resource: str, action: str) -> Callable[[F], F]:
         def wrapped(*args, **kwargs):
             user = current_user()
             if not user:
-                flash("Please log in to continue.", "warning")
+                flash("Merci de vous connecter pour continuer.", "warning")
                 return redirect(url_for("login"))
 
             if not authorization_enforcer.can_access(user, resource, action):
-                flash("You do not have the required permission for that action.", "error")
+                flash("Vous n’avez pas les droits nécessaires pour cette action.", "error")
                 audit_event(
                     "authorization_denied",
                     user.get("username"),

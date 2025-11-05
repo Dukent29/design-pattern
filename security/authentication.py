@@ -4,12 +4,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Mapping, Optional
+from typing import Optional
 
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .audit import audit_event
+from .db import get_session, init_db
+from .models import User
+
+try:
+    from sqlalchemy import select
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError as exc:  # pragma: no cover
+    raise RuntimeError(
+        "SQLAlchemy is required for database persistence. Install it with 'pip install sqlalchemy'."
+    ) from exc
 
 
 @dataclass(frozen=True)
@@ -20,42 +30,64 @@ class AuthenticatedUser:
     role: str
 
 
-def _build_user_store() -> Dict[str, Dict[str, str]]:
-    """Create an in-memory user store with hashed passwords."""
-
-    def _hashed(password: str) -> str:
-        return generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)
-
-    return {
-        "admin": {
-            "username": "admin",
-            "password_hash": _hashed("Admin#1234"),
-            "role": "admin",
-        },
-        "alice": {
-            "username": "alice",
-            "password_hash": _hashed("User#1234"),
-            "role": "editor",
-        },
-        "bob": {
-            "username": "bob",
-            "password_hash": _hashed("AnalystPass123!"),
-            "role": "viewer",
-        },
-        "carol": {
-            "username": "carol",
-            "password_hash": _hashed("ViewerPass123!"),
-            "role": "viewer",
-        },
-        "charlie": {
-            "username": "charlie",
-            "password_hash": _hashed("User#1234"),
-            "role": "viewer",
-        },
-    }
+_DEFAULT_USERS = (
+    ("admin", "Admin#1234", "admin"),
+    ("alice", "User#1234", "editor"),
+    ("bob", "AnalystPass123!", "viewer"),
+    ("carol", "ViewerPass123!", "viewer"),
+    ("charlie", "User#1234", "viewer"),
+)
 
 
-_USERS = _build_user_store()
+class SQLUserStore:
+    """MySQL-backed user repository."""
+
+    def __init__(self) -> None:
+        init_db()
+        self._seed_defaults()
+
+    def _seed_defaults(self) -> None:
+        with get_session() as session:
+            for username, password, role in _DEFAULT_USERS:
+                normalized = username.lower()
+                exists = session.scalar(select(User.id).where(User.username == normalized))
+                if exists:
+                    continue
+                user = User(
+                    username=normalized,
+                    password_hash=generate_password_hash(password),
+                    role=role.lower(),
+                )
+                session.add(user)
+
+    def find_by_username(self, username: str) -> Optional[User]:
+        if not username:
+            return None
+        with get_session() as session:
+            return session.scalar(select(User).where(User.username == username.lower()))
+
+    def create_user(self, username: str, password: str, role: str) -> User:
+        normalized_username = (username or "").strip().lower()
+        if not normalized_username:
+            raise ValueError("Le nom d’utilisateur est obligatoire.")
+
+        with get_session() as session:
+            existing = session.scalar(select(User).where(User.username == normalized_username))
+            if existing:
+                raise ValueError("Cet utilisateur existe déjà.")
+
+            if not role:
+                raise ValueError("Le rôle est obligatoire.")
+
+            user = User(
+                username=normalized_username,
+                password_hash=generate_password_hash(password),
+                role=role.lower(),
+            )
+            session.add(user)
+            session.flush()
+            session.refresh(user)
+            return user
 
 
 class AuthenticationEnforcer:
@@ -67,9 +99,9 @@ class AuthenticationEnforcer:
 
     def __init__(
         self,
-        user_store: Optional[Mapping[str, Mapping[str, str]]] = None,
+        user_store: Optional[SQLUserStore] = None,
     ) -> None:
-        self._user_store = user_store or _USERS
+        self._user_store = user_store or SQLUserStore()
 
     def _new_expiry(self) -> datetime:
         return datetime.now(timezone.utc) + self.SESSION_DURATION
@@ -92,16 +124,21 @@ class AuthenticationEnforcer:
             audit_event("login_failed", username or None, {"reason": "missing_credentials"})
             return None
 
-        record = self._user_store.get(username.lower())
+        try:
+            record = self._user_store.find_by_username(username)
+        except SQLAlchemyError as exc:
+            audit_event("login_failed", username, {"reason": "db_error"})
+            raise RuntimeError(f"Database error while fetching user: {exc}") from exc
+
         if not record:
             audit_event("login_failed", username, {"reason": "unknown_user"})
             return None
 
-        if not check_password_hash(record["password_hash"], password):
+        if not check_password_hash(record.password_hash, password):
             audit_event("login_failed", username, {"reason": "invalid_password"})
             return None
 
-        user = AuthenticatedUser(username=record["username"], role=record["role"])
+        user = AuthenticatedUser(username=record.username, role=record.role)
         self._persist_session(user)
         audit_event("login_success", user.username)
         return user
@@ -151,24 +188,14 @@ class AuthenticationEnforcer:
         role: str,
     ) -> AuthenticatedUser:
         """Create a new user in the backing user store."""
-        normalized_username = (username or "").strip().lower()
-        if not normalized_username:
-            raise ValueError("Username is required.")
+        try:
+            record = self._user_store.create_user(username, password, role)
+        except SQLAlchemyError as exc:
+            audit_event("user_creation_failed", username, {"reason": "db_error"})
+            raise RuntimeError(f"Database error while creating user: {exc}") from exc
 
-        if normalized_username in self._user_store:
-            raise ValueError("User already exists.")
-
-        if not role:
-            raise ValueError("Role is required.")
-
-        record = {
-            "username": normalized_username,
-            "password_hash": generate_password_hash(password),
-            "role": role,
-        }
-        self._user_store[normalized_username] = record
-        audit_event("user_created", normalized_username, {"role": role})
-        return AuthenticatedUser(username=normalized_username, role=role)
+        audit_event("user_created", record.username, {"role": record.role})
+        return AuthenticatedUser(username=record.username, role=record.role)
 
 
 auth_enforcer = AuthenticationEnforcer()
