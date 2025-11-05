@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8">
-    <title>Secure Login</title>
+    <title>Connexion sécurisée</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       :root {
@@ -273,15 +273,15 @@
   <body>
     <div class="login-shell">
       <section class="info-panel">
-        <span class="badge">Security First</span>
-        <h1><span>Secure Portal</span>Protect Your Access</h1>
-        <p>Experience a modern authentication flow that puts zero-trust principles into action. Every request is validated, every action audited.</p>
-        <p>Review the guidelines, apply patterns consistently, and deliver resilient user journeys.</p>
+        <span class="badge">Sécurité d’abord</span>
+        <h1><span>Portail sécurisé</span>Protégez vos accès</h1>
+        <p>Découvrez un parcours d’authentification moderne appliquant les principes de confiance zéro. Chaque requête est validée, chaque action auditée.</p>
+        <p>Appliquez les bonnes pratiques de sécurité et garantissez une expérience utilisateur résiliente.</p>
         <div class="divider"></div>
       </section>
 
       <section class="form-panel" role="main">
-        <h2>Sign in to continue</h2>
+        <h2>Connectez-vous pour continuer</h2>
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <div class="flash-container">
@@ -294,11 +294,11 @@
 
         <form method="post" autocomplete="off" novalidate>
           <div>
-            <label for="username">Username</label>
+            <label for="username">Nom d’utilisateur</label>
             <input id="username"
                    type="text"
                    name="username"
-                   placeholder="Enter your username"
+                   placeholder="Entrez votre nom d’utilisateur"
                    required
                    minlength="3"
                    maxlength="32"
@@ -307,21 +307,21 @@
           </div>
 
           <div>
-            <label for="password">Password</label>
+            <label for="password">Mot de passe</label>
             <input id="password"
                    type="password"
                    name="password"
-                   placeholder="Enter your password"
+                   placeholder="Entrez votre mot de passe"
                    required
                    minlength="8"
                    autocomplete="current-password">
           </div>
 
-          <button type="submit">Log In</button>
+          <button type="submit">Se connecter</button>
 
-          <div class="links">
-            <a href="#" aria-disabled="true">Forgot password?</a>
-            <a href="#" aria-disabled="true">Need help?</a>
+        <div class="links">
+          <a href="#" aria-disabled="true">Mot de passe oublié ?</a>
+          <a href="#" aria-disabled="true">Besoin d’aide ?</a>
           </div>
         </form>
       </section>

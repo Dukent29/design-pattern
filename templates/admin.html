@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8">
-    <title>Admin Panel</title>
+    <title>Panneau d’administration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <style>
@@ -42,12 +42,12 @@
   <body>
     <header>
       <div>
-        <h1>Admin Panel</h1>
-        <p>Signed in as <strong>{{ user.username }}</strong> ({{ user.role }})</p>
+        <h1>Panneau d’administration</h1>
+        <p>Connecté en tant que <strong>{{ user.username }}</strong> ({{ user.role }})</p>
       </div>
       <nav>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a> |
-        <a href="{{ url_for('logout') }}">Log out</a>
+        <a href="{{ url_for('dashboard') }}">Tableau de bord</a> |
+        <a href="{{ url_for('logout') }}">Se déconnecter</a>
       </nav>
     </header>
 
@@ -69,48 +69,48 @@
       {% endwith %}
 
       <article class="card">
-        <h2>Create User</h2>
-        <p>Use this form to provision a new account. Passwords are hashed before storage.</p>
+        <h2>Créer un utilisateur</h2>
+        <p>Utilisez ce formulaire pour créer un nouveau compte. Les mots de passe sont hachés avant d’être stockés.</p>
         <form method="post" style="display:grid;gap:1rem;">
           <label style="display:grid;gap:0.35rem;">
-            <span>Username</span>
+            <span>Nom d’utilisateur</span>
             <input type="text" name="username" required minlength="3" maxlength="20"
                    pattern="[A-Za-z0-9]{3,20}"
                    style="padding:0.65rem;border-radius:10px;border:1px solid rgba(148,163,184,0.35);">
           </label>
           <label style="display:grid;gap:0.35rem;">
-            <span>Password</span>
+            <span>Mot de passe</span>
             <input type="password" name="password" required
-                   placeholder="Upper, lower, digit, special, 8+ chars"
+                   placeholder="Majuscule, minuscule, chiffre, symbole, 8+ caractères"
                    style="padding:0.65rem;border-radius:10px;border:1px solid rgba(148,163,184,0.35);">
           </label>
           <label style="display:grid;gap:0.35rem;">
-            <span>Role</span>
+            <span>Rôle</span>
             <select name="role" required style="padding:0.65rem;border-radius:10px;border:1px solid rgba(148,163,184,0.35);">
-              <option value="">Select role…</option>
-              <option value="admin">Admin</option>
-              <option value="editor">Editor</option>
-              <option value="viewer">Viewer</option>
+              <option value="">Choisir un rôle…</option>
+              <option value="admin">Administrateur</option>
+              <option value="editor">Éditeur</option>
+              <option value="viewer">Lecteur</option>
             </select>
           </label>
           <button type="submit"
                   style="padding:0.75rem 1.25rem;border:none;border-radius:12px;
                          background:linear-gradient(135deg,#38bdf8,#2563eb);color:#fff;
                          font-weight:600;letter-spacing:0.05ch;cursor:pointer;">
-            Create User
+            Créer l’utilisateur
           </button>
         </form>
       </article>
 
       <article class="card">
-        <h2>API Reference</h2>
-        <p>Prefer automation? Send a POST request to <code>/api/users</code> with JSON:</p>
+        <h2>Référence API</h2>
+        <p>Besoin d’automatisation&nbsp;? Envoyez une requête POST vers <code>/api/users</code> avec ce JSON&nbsp;:</p>
 <pre>{
   "username": "newuser",
   "password": "StrongPass#123",
   "role": "viewer"
 }</pre>
-        <p>The endpoint enforces the same validation rules and records the action in the audit log.</p>
+        <p>Ce point de terminaison applique les mêmes validations et journalise chaque action.</p>
       </article>
     </main>
   </body>

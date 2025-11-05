@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import Any, Dict
+
+from dotenv import load_dotenv
 from flask import (
     Flask,
     Response,
@@ -11,6 +13,8 @@ from flask import (
     jsonify,
     url_for,
 )
+
+load_dotenv()
 
 from security.authentication import AuthenticatedUser, auth_enforcer
 from security.authorization import current_user, require_permission, require_roles
@@ -66,10 +70,10 @@ def create_app() -> Flask:
                 result.data["password"],
             )
             if not user:
-                flash("Invalid username or password.", "error")
+                flash("Nom d’utilisateur ou mot de passe invalide.", "error")
                 return render_template("login.html"), 401
 
-            flash("Successfully signed in.", "success")
+            flash("Connexion réussie.", "success")
             return redirect(url_for("dashboard"))
 
         return render_template("login.html")
@@ -103,6 +107,7 @@ def create_app() -> Flask:
     @require_roles("admin")
     def admin_panel(user):
         if request.method == "POST":
+            # Admin-triggered account provisioning via HTML form.
             payload = {
                 "username": request.form.get("username", ""),
                 "password": request.form.get("password", ""),
@@ -133,8 +138,16 @@ def create_app() -> Flask:
                     {"reason": str(exc), "source": "admin_form"},
                 )
                 return render_template("admin.html", user=user), 400
+            except RuntimeError as exc:
+                flash("Erreur de base de données lors de la création de l’utilisateur.", "error")
+                audit_event(
+                    "user_creation_failed",
+                    user.get("username"),
+                    {"reason": "db_error", "details": str(exc), "source": "admin_form"},
+                )
+                return render_template("admin.html", user=user), 500
 
-            flash(f"User '{created_user.username}' created successfully.", "success")
+            flash(f"Utilisateur « {created_user.username} » créé avec succès.", "success")
             audit_event(
                 "user_creation_success",
                 user.get("username"),
@@ -153,7 +166,7 @@ def create_app() -> Flask:
     def create_user_api(user):
         if not request.is_json:
             audit_event("user_creation_failed", user.get("username"), {"reason": "invalid_content_type"})
-            return jsonify({"errors": ["Content-Type must be application/json"]}), 415
+            return jsonify({"errors": ["Le Content-Type doit être application/json"]}), 415
 
         payload = request.get_json(silent=True) or {}
         result = validate_user_creation_payload(payload)
@@ -174,6 +187,13 @@ def create_app() -> Flask:
         except ValueError as exc:
             audit_event("user_creation_failed", user.get("username"), {"reason": str(exc)})
             return jsonify({"errors": [str(exc)]}), 400
+        except RuntimeError as exc:
+            audit_event(
+                "user_creation_failed",
+                user.get("username"),
+                {"reason": "db_error", "details": str(exc)},
+            )
+            return jsonify({"errors": ["Erreur de base de données lors de la création de l’utilisateur."]}), 500
 
         audit_event(
             "user_creation_success",

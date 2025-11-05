@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8">
-    <title>Secure Dashboard</title>
+    <title>Tableau de bord sécurisé</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       :root {
@@ -223,8 +223,8 @@
     <div class="halo alt"></div>
     <header>
       <div class="title">
-        <span>Security Console</span>
-        <h1>Welcome back, {{ user.username }}!</h1>
+        <span>Console de sécurité</span>
+        <h1>Bon retour, {{ user.username }} !</h1>
       </div>
       <div>
         <div class="user-chip">
@@ -233,33 +233,36 @@
             <span>{{ current_user.username }}</span>
           {% endif %}
         </div>
-        <a class="logout" href="{{ url_for('logout') }}">Log out</a>
+        <a class="logout" href="{{ url_for('logout') }}">Se déconnecter</a>
+        {% if user.role == 'admin' %}
+        <a class="logout" style="margin-left: 0.75rem;" href="{{ url_for('admin_panel') }}">Créer un utilisateur</a>
+        {% endif %}
       </div>
     </header>
 
     <main>
       <article class="card">
-        <h2>Access Overview</h2>
-        <p>This space can surface environment insights, alerts, and recommended actions tailored to the <strong>{{ user.role }}</strong> role. Integrate audit feeds or analytic widgets here to complete the pattern demonstration.</p>
+        <h2>Vue d’ensemble des accès</h2>
+        <p>Cette zone peut afficher des informations clés, alertes et actions recommandées adaptées au rôle <strong>{{ user.role }}</strong>. Intégrez ici des flux d’audit ou des widgets analytiques pour compléter la démonstration.</p>
         <div class="metric-grid">
           <div class="metric">
-            <span class="label">Active Sessions</span>
+            <span class="label">Sessions actives</span>
             <span class="value">3</span>
           </div>
           <div class="metric">
-            <span class="label">Alerts</span>
+            <span class="label">Alertes</span>
             <span class="value">0</span>
           </div>
           <div class="metric">
-            <span class="label">Last Audit</span>
+            <span class="label">Dernier audit</span>
             <span class="value">5&nbsp;min</span>
           </div>
         </div>
       </article>
       <article class="card">
-        <h2>Next Actions</h2>
-        <p>Finish hardening the application by validating inputs, enforcing RBAC on critical routes, and reviewing audit trails. Add your own components to show how each pattern works in concert.</p>
-        <p class="muted">Hint: surface per-role quick links or embed charts to build a complete experience.</p>
+        <h2>Actions suivantes</h2>
+        <p>Poursuivez le durcissement de l’application en validant les entrées, en appliquant le RBAC sur les routes critiques et en analysant les journaux d’audit. Ajoutez vos propres composants pour illustrer chaque patron en action.</p>
+        <p class="muted">Astuce&nbsp;: proposez des liens rapides selon les rôles ou intégrez des graphiques pour enrichir l’expérience.</p>
       </article>
     </main>
 
